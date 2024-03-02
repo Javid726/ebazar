@@ -4,8 +4,9 @@ import { cn } from '@/lib/utils';
 import { Loader2, Facebook } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+import { toast } from 'sonner';
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
@@ -29,17 +30,20 @@ const formSchema = z.object({
   password: z
     .string()
     .min(6, { message: 'Ən azı 6 simvoldan ibarət olmalıdır' }),
+  store_name: z.string().min(1, { message: 'Bu xana mütləq doldurulmalıdır.' }),
 });
 
 interface UserAuthFormProps extends React.HTMLAttributes<HTMLDivElement> {}
 
 export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
+  const router = useRouter();
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       email: '',
       password: '',
+      store_name: '',
     },
   });
 
@@ -56,10 +60,46 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
     // Do something with the form values.
     // ✅ This will be type-safe and validated.
     setIsLoading(true);
+    console.log(values);
 
-    setTimeout(() => {
-      setIsLoading(false);
-    }, 3000);
+    async function createProfile() {
+      const requestOptions: RequestInit = {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Accept: 'application/json',
+        },
+        body: JSON.stringify({
+          email: values.email,
+          password: values.password,
+          store_name: values.store_name,
+        }),
+        // mode: 'no-cors',
+      };
+      const response = await fetch(
+        'http://159.89.20.242/api/vendor/register',
+        requestOptions,
+      );
+
+      const result = await response.json();
+
+      console.log(result);
+
+      if (response.ok) {
+        localStorage.setItem('vendor_token', result.vendor_token);
+        router.push('/dashboard');
+        setIsLoading(false);
+      } else {
+        toast.error(result.message, {});
+        setIsLoading(false);
+      }
+    }
+
+    createProfile();
+
+    // setTimeout(() => {
+    //   setIsLoading(false);
+    // }, 3000);
 
     console.log(values);
   }
@@ -97,7 +137,7 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
                 name="password"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="sr-only">Password</FormLabel>
+                    <FormLabel className="sr-only">Şifrə</FormLabel>
                     <FormControl>
                       <Input
                         id="password"
@@ -105,6 +145,28 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
                         type="password"
                         autoCapitalize="none"
                         autoComplete="password"
+                        autoCorrect="off"
+                        disabled={isLoading}
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="store_name"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="sr-only">Mağaza adı</FormLabel>
+                    <FormControl>
+                      <Input
+                        id="store"
+                        placeholder="Mağaza adı"
+                        type="text"
+                        autoCapitalize="none"
+                        autoComplete="string"
                         autoCorrect="off"
                         disabled={isLoading}
                         {...field}
