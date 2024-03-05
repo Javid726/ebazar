@@ -1,9 +1,14 @@
+'use client';
+
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
+import { useRouter } from 'next/navigation';
 
 interface SidebarProps extends React.HTMLAttributes<HTMLDivElement> {}
 
 export function Sidebar({ className }: SidebarProps) {
+  const router = useRouter();
+
   return (
     <div className={cn('pb-12', className)}>
       <div className="space-y-4 py-4">
@@ -12,7 +17,11 @@ export function Sidebar({ className }: SidebarProps) {
             E-bazar
           </h2>
           <div className="space-y-1">
-            <Button variant="secondary" className="w-full justify-start">
+            <Button
+              variant="secondary"
+              className="w-full justify-start"
+              onClick={() => router.push('dashboard/categories')}
+            >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 viewBox="0 0 24 24"
