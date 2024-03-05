@@ -1,7 +1,7 @@
 'use client';
 
 import { Button } from '@/components/ui/button';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { Input } from '@/components/ui/input';
@@ -31,6 +31,9 @@ import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 
+import { Payment, columns } from './components/columns';
+import { DataTable } from './components/data-table';
+
 const formSchema = z.object({
   category_name: z.string().min(1, { message: 'Bu xana boş qoyula bilməz' }),
   parent_id: z.string(),
@@ -41,6 +44,7 @@ const formSchema = z.object({
 export default function CategoriesPage() {
   const [open, setOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [categories, setCategories] = useState([]);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -68,7 +72,7 @@ export default function CategoriesPage() {
         body: JSON.stringify({
           name: values.category_name,
           parent_id: values.parent_id,
-          descriptin: values.category_description,
+          description: values.category_description,
           slug: slug,
         }),
         // mode: 'no-cors',
@@ -117,6 +121,60 @@ export default function CategoriesPage() {
     sendCategoryData();
   };
 
+  useEffect(() => {
+    async function getData() {
+      const requestOptions: RequestInit = {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          Accept: 'application/json',
+          Authorization: `Bearer ${localStorage.getItem('vendor_token')}`,
+        },
+      };
+
+      const response = await fetch(
+        'http://technostore.az/api/vendor/categories',
+        requestOptions,
+      );
+      const data = await response.json();
+
+      setCategories(data);
+    }
+
+    getData();
+  }, []);
+
+  function getData(): any {
+    return [
+      {
+        id: '728ed52f',
+        parent_id: 100,
+        category_name: 'pending',
+        category_description: 'm@example.com',
+      },
+      // {
+      //   id: '489e1d42',
+      //   amount: 125,
+      //   status: 'processing',
+      //   email: 'example@gmail.com',
+      // },
+      // {
+      //   id: '489e1d42',
+      //   amount: 125,
+      //   status: 'processing',
+      //   email: 'example@gmail.com',
+      // },
+      // {
+      //   id: '489e1d42',
+      //   amount: 125,
+      //   status: 'processing',
+      //   email: 'example@gmail.com',
+      // },
+    ];
+  }
+
+  const data = getData();
+
   return (
     <div>
       <div className="my-2 flex justify-between">
@@ -128,6 +186,9 @@ export default function CategoriesPage() {
         >
           Add Category
         </Button>
+      </div>
+      <div className="mt-20">
+        <DataTable columns={columns} data={categories} />
       </div>
       <Drawer open={open} onOpenChange={setOpen}>
         <DrawerContent className="h-4/5 px-10">
