@@ -1,6 +1,11 @@
 import { Separator } from '@/components/ui/separator';
 import { Sidebar } from './sidebar';
+import ProtectedRoute from '@/components/ProtectedRoute';
 
 export default function DashboardPage() {
-  return <div>DashboarddiSS</div>;
+  return (
+    <ProtectedRoute>
+      <div>DashboarddiSS</div>
+    </ProtectedRoute>
+  );
 }

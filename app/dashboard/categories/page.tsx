@@ -66,9 +66,9 @@ export default function CategoriesPage() {
           Authorization: `Bearer ${localStorage.getItem('vendor_token')}`,
         },
         body: JSON.stringify({
-          category_name: values.category_name,
+          name: values.category_name,
           parent_id: values.parent_id,
-          category_descriptin: values.category_description,
+          descriptin: values.category_description,
           slug: slug,
         }),
         // mode: 'no-cors',
@@ -77,7 +77,7 @@ export default function CategoriesPage() {
       try {
         const response = await fetch(
           'http://159.89.20.242/api/vendor/categories',
-          requestOptions
+          requestOptions,
         );
         const result = await response.json();
 
