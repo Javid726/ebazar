@@ -81,7 +81,7 @@ export default function CategoriesPage() {
       try {
         const response = await fetch(
           'http://159.89.20.242/api/vendor/categories',
-          requestOptions,
+          requestOptions
         );
         const result = await response.json();
 
@@ -122,26 +122,23 @@ export default function CategoriesPage() {
   };
 
   useEffect(() => {
-    async function getData() {
-      const requestOptions: RequestInit = {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-          Accept: 'application/json',
-          Authorization: `Bearer ${localStorage.getItem('vendor_token')}`,
-        },
-      };
-
-      const response = await fetch(
-        'http://technostore.az/api/vendor/categories',
-        requestOptions,
-      );
-      const data = await response.json();
-
-      setCategories(data);
-    }
-
-    getData();
+    // async function getData() {
+    //   const requestOptions: RequestInit = {
+    //     method: 'GET',
+    //     headers: {
+    //       'Content-Type': 'application/json',
+    //       Accept: 'application/json',
+    //       Authorization: `Bearer ${localStorage.getItem('vendor_token')}`,
+    //     },
+    //   };
+    //   const response = await fetch(
+    //     'http://technostore.az/api/vendor/categories',
+    //     requestOptions,
+    //   );
+    //   const data = await response.json();
+    //   setCategories(data);
+    // }
+    // getData();
   }, []);
 
   function getData(): any {
@@ -149,27 +146,27 @@ export default function CategoriesPage() {
       {
         id: '728ed52f',
         parent_id: 100,
-        category_name: 'pending',
-        category_description: 'm@example.com',
+        name: 'pending',
+        description: 'm@example.com',
       },
-      // {
-      //   id: '489e1d42',
-      //   amount: 125,
-      //   status: 'processing',
-      //   email: 'example@gmail.com',
-      // },
-      // {
-      //   id: '489e1d42',
-      //   amount: 125,
-      //   status: 'processing',
-      //   email: 'example@gmail.com',
-      // },
-      // {
-      //   id: '489e1d42',
-      //   amount: 125,
-      //   status: 'processing',
-      //   email: 'example@gmail.com',
-      // },
+      {
+        id: '489e1d42',
+        parent_id: 125,
+        name: 'processing',
+        description: 'example@gmail.com',
+      },
+      {
+        id: '489e1d42',
+        amount: 125,
+        name: 'processing',
+        description: 'example@gmail.com',
+      },
+      {
+        id: '489e1d42',
+        amount: 125,
+        name: 'processing',
+        description: 'example@gmail.com',
+      },
     ];
   }
 
@@ -188,7 +185,7 @@ export default function CategoriesPage() {
         </Button>
       </div>
       <div className="mt-20">
-        <DataTable columns={columns} data={categories} />
+        <DataTable columns={columns} data={data} />
       </div>
       <Drawer open={open} onOpenChange={setOpen}>
         <DrawerContent className="h-4/5 px-10">
