@@ -1,5 +1,6 @@
 import { Sidebar } from './sidebar';
 import { Separator } from '@/components/ui/separator';
+// import StoreProvider from '../StoreProvider';
 
 export default function DashboardLayout({
   children,
@@ -7,6 +8,7 @@ export default function DashboardLayout({
   children: React.ReactNode;
 }>) {
   return (
+    // <StoreProvider>
     <div className="min-h-screen flex gap-2">
       <aside className="w-[200px]">
         <Sidebar />
@@ -16,5 +18,6 @@ export default function DashboardLayout({
         {children}
       </div>
     </div>
+    // </StoreProvider>
   );
 }

@@ -1,7 +1,13 @@
 'use client';
 
 import { Button } from '@/components/ui/button';
-import { useEffect, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
+import {
+  CategoryContext,
+  // CategoryDispatchContext,
+} from '@/app/category-provider';
+// import { CategoryDispatchContext } from '@/app/category-reducer';
+
 import { Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { Input } from '@/components/ui/input';
@@ -31,7 +37,7 @@ import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 
-import { Payment, columns } from './components/columns';
+import { columns } from './components/columns';
 import { DataTable } from './components/data-table';
 
 const formSchema = z.object({
@@ -45,6 +51,33 @@ export default function CategoriesPage() {
   const [open, setOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [categories, setCategories] = useState([]);
+  const [editedCategoryId, setEditedCategoryId] = useState('');
+  const { edit, handleResetEdit, handleSetEdit } = useContext(CategoryContext);
+  // const dispatch = useContext(CategoryDispatchContext);
+
+  console.log(edit);
+
+  const handleEditCategory = async (values: any) => {
+    const { id } = values;
+    setEditedCategoryId(id);
+
+    const url = `http://technostore.az/api/vendor/categories/${id}`;
+    const requestOptions = {
+      headers: {
+        'Content-type': 'application/json',
+        Accept: 'application/json',
+        Authorization: `Bearer ${localStorage.getItem('vendor_token')}`,
+      },
+    };
+
+    const response = await fetch(url, requestOptions);
+    const result = await response.json();
+
+    const { name, description } = result[0];
+
+    form.setValue('category_name', name);
+    form.setValue('category_description', description);
+  };
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -58,6 +91,7 @@ export default function CategoriesPage() {
 
   const addCategory = (values: z.infer<typeof formSchema>) => {
     async function sendCategoryData() {
+      console.log('sended');
       setIsLoading(true);
 
       const slug = values.category_name.toLowerCase().trim().replace(' ', '_');
@@ -81,7 +115,7 @@ export default function CategoriesPage() {
       try {
         const response = await fetch(
           'http://159.89.20.242/api/vendor/categories',
-          requestOptions
+          requestOptions,
         );
         const result = await response.json();
 
@@ -118,74 +152,122 @@ export default function CategoriesPage() {
       }
     }
 
-    sendCategoryData();
+    async function editCategoryData() {
+      setIsLoading(true);
+
+      const slug = values.category_name.toLowerCase().trim().replace(' ', '_');
+
+      const requestOptions: RequestInit = {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          Accept: 'application/json',
+          Authorization: `Bearer ${localStorage.getItem('vendor_token')}`,
+        },
+        body: JSON.stringify({
+          name: values.category_name,
+          parent_id: values.parent_id,
+          description: values.category_description,
+          slug: slug,
+        }),
+        // mode: 'no-cors',
+      };
+
+      try {
+        const response = await fetch(
+          `http://159.89.20.242/api/vendor/categories/${editedCategoryId}`,
+          requestOptions,
+        );
+        const result = await response.json();
+
+        if (response.ok) {
+          setIsLoading(false);
+
+          toast('Yeni kateqoriya əlavə edildi!', {
+            action: {
+              label: 'Ok',
+              onClick: () => {
+                setOpen(false);
+              },
+            },
+          });
+        } else {
+          if (result.message) {
+            toast.error(result.message, {});
+          } else {
+            toast.error('Daxil etdiyiniz məlumatlarda yanlışlıq var');
+          }
+          setIsLoading(false);
+        }
+      } catch (error) {
+        toast.error('Gözlənilməyən xəta yarandı.', {
+          description: 'Zəhmət olmasa başqa vaxt yenidən cəhd edin..',
+          action: {
+            label: 'Ok',
+            onClick: () => {
+              setOpen(false);
+            },
+          },
+        });
+        setIsLoading(false);
+      }
+    }
+
+    if (!edit) {
+      sendCategoryData();
+    } else {
+      editCategoryData();
+    }
   };
 
   useEffect(() => {
-    // async function getData() {
-    //   const requestOptions: RequestInit = {
-    //     method: 'GET',
-    //     headers: {
-    //       'Content-Type': 'application/json',
-    //       Accept: 'application/json',
-    //       Authorization: `Bearer ${localStorage.getItem('vendor_token')}`,
-    //     },
-    //   };
-    //   const response = await fetch(
-    //     'http://technostore.az/api/vendor/categories',
-    //     requestOptions,
-    //   );
-    //   const data = await response.json();
-    //   setCategories(data);
-    // }
-    // getData();
+    const getData = async () => {
+      const requestOptions: RequestInit = {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          Accept: 'application/json',
+          Authorization: `Bearer ${localStorage.getItem('vendor_token')}`,
+        },
+      };
+      try {
+        const response = await fetch(
+          'http://technostore.az/api/vendor/categories',
+          requestOptions,
+        );
+        const data = await response.json();
+        setCategories(data);
+      } catch (error) {
+        console.log(error);
+        setCategories([]);
+      }
+    };
+
+    getData();
   }, []);
-
-  function getData(): any {
-    return [
-      {
-        id: '728ed52f',
-        parent_id: 100,
-        name: 'pending',
-        description: 'm@example.com',
-      },
-      {
-        id: '489e1d42',
-        parent_id: 125,
-        name: 'processing',
-        description: 'example@gmail.com',
-      },
-      {
-        id: '489e1d42',
-        amount: 125,
-        name: 'processing',
-        description: 'example@gmail.com',
-      },
-      {
-        id: '489e1d42',
-        amount: 125,
-        name: 'processing',
-        description: 'example@gmail.com',
-      },
-    ];
-  }
-
-  const data = getData();
 
   return (
     <div>
       <div className="my-2 flex justify-between">
-        <h1 className="text-2xl font-semibold tracking-tight">Categories</h1>
+        <h1 className="text-2xl font-semibold tracking-tight">Kateqoriyalar</h1>
         <Button
           type="button"
           className="mr-4 font-medium text-md"
-          onClick={() => setOpen(true)}
+          onClick={() => {
+            setOpen(true);
+            handleSetEdit();
+          }}
         >
-          Add Category
+          Kateqoriya əlavə et
         </Button>
       </div>
       <div className="mt-20">
-        <DataTable columns={columns} data={data} />
+        <DataTable
+          columns={columns}
+          data={categories}
+          setOpen={setOpen}
+          onEditCategory={handleEditCategory}
+        />
       </div>
       <Drawer open={open} onOpenChange={setOpen}>
         <DrawerContent className="h-4/5 px-10">
@@ -278,7 +360,7 @@ export default function CategoriesPage() {
                   {isLoading && (
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                   )}
-                  Əlavə et
+                  Yadda saxla
                 </Button>
                 <Button
                   type="button"
@@ -287,6 +369,8 @@ export default function CategoriesPage() {
                   disabled={isLoading}
                   onClick={() => {
                     setOpen(false);
+                    handleResetEdit();
+                    // dispatch({ type: 'add_category', payload: { edit: 5 } });
                   }}
                 >
                   Ləğv et

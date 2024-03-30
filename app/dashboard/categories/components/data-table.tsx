@@ -1,5 +1,6 @@
 'use client';
 
+import { SlidersHorizontalIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
@@ -29,33 +30,49 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { useState } from 'react';
+import { Dispatch, SetStateAction, useContext, useState } from 'react';
+import { CategoryContext } from '@/app/category-provider';
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
+  setOpen: Dispatch<SetStateAction<boolean>>;
+  onEditCategory: (value: {}) => void;
 }
 
 export function DataTable<TData, TValue>({
   columns,
   data,
+  setOpen,
+  onEditCategory,
 }: DataTableProps<TData, TValue>) {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
+  const [rowSelection, setRowSelection] = useState({});
+  const { handleResetEdit } = useContext(CategoryContext);
+
+  const updatedColumns = columns.map(column => ({
+    ...column,
+    customProps: { setOpen, onEditCategory, handleResetEdit }, // Add custom property
+  }));
 
   const table = useReactTable({
     data,
-    columns,
+    columns: updatedColumns,
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
     onSortingChange: setSorting,
     getSortedRowModel: getSortedRowModel(),
     onColumnFiltersChange: setColumnFilters,
     getFilteredRowModel: getFilteredRowModel(),
+    onColumnVisibilityChange: setColumnVisibility,
+    onRowSelectionChange: setRowSelection,
     state: {
       sorting,
       columnFilters,
+      columnVisibility,
+      rowSelection,
     },
   });
 
@@ -68,11 +85,16 @@ export function DataTable<TData, TValue>({
           onChange={event =>
             table.getColumn('name')?.setFilterValue(event.target.value)
           }
-          className="max-w-sm"
+          className="max-w-sm shadow-sm"
         />
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="outline" className="ml-auto">
+            <Button
+              variant="outline"
+              size="sm"
+              className="ml-auto shadow lg:flex"
+            >
+              <SlidersHorizontalIcon className="mr-2 h-4 w-4" />
               Görünüş
             </Button>
           </DropdownMenuTrigger>
@@ -107,7 +129,7 @@ export function DataTable<TData, TValue>({
                         ? null
                         : flexRender(
                             header.column.columnDef.header,
-                            header.getContext()
+                            header.getContext(),
                           )}
                     </TableHead>
                   );
@@ -126,7 +148,7 @@ export function DataTable<TData, TValue>({
                     <TableCell key={cell.id}>
                       {flexRender(
                         cell.column.columnDef.cell,
-                        cell.getContext()
+                        cell.getContext(),
                       )}
                     </TableCell>
                   ))}
@@ -144,7 +166,11 @@ export function DataTable<TData, TValue>({
             )}
           </TableBody>
         </Table>
-        <div className="flex items-center justify-end space-x-2 py-4">
+        <div className="flex items-center justify-end space-x-2 py-4 mx-2">
+          <div className="flex-1 text-sm text-muted-foreground">
+            {table.getFilteredSelectedRowModel().rows.length} of{' '}
+            {table.getFilteredRowModel().rows.length} row(s) selected.
+          </div>
           <Button
             variant="outline"
             size="sm"
