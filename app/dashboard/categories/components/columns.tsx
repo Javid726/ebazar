@@ -110,12 +110,18 @@ export const columns: CustomColumnDef<Category & CustomColumnProps>[] & {
                 column.columnDef.customProps.setOpen(true);
                 column.columnDef.customProps.onEditCategory(payment);
                 column.columnDef.customProps.handleResetEdit();
-                console.log(column.columnDef);
               }}
             >
               Redaktə et
             </DropdownMenuItem>
-            <DropdownMenuItem>Kateqoriyanı sil</DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem
+              onClick={() =>
+                column.columnDef.customProps.handleOpen(payment.id)
+              }
+            >
+              Kateqoriyanı sil
+            </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       );

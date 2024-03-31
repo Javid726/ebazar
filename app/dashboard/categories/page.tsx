@@ -39,6 +39,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 
 import { columns } from './components/columns';
 import { DataTable } from './components/data-table';
+import { AlertDialogEl } from './components/AlertDialogEl';
 
 const formSchema = z.object({
   category_name: z.string().min(1, { message: 'Bu xana boş qoyula bilməz' }),
@@ -52,16 +53,28 @@ export default function CategoriesPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [categories, setCategories] = useState([]);
   const [editedCategoryId, setEditedCategoryId] = useState('');
+  const [deletedCategoryId, setDeletedCategoryId] = useState('');
   const { edit, handleResetEdit, handleSetEdit } = useContext(CategoryContext);
+  const [renderPage, setRenderPage] = useState(false);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   // const dispatch = useContext(CategoryDispatchContext);
 
-  console.log(edit);
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      category_name: '',
+      parent_id: '',
+      slug: '',
+      category_description: '',
+    },
+  });
 
-  const handleEditCategory = async (values: any) => {
+  const handleGetEditedCategory = async (values: any) => {
+    console.log('somehow I run here');
     const { id } = values;
     setEditedCategoryId(id);
 
-    const url = `http://technostore.az/api/vendor/categories/${id}`;
+    const url = `${process.env.NEXT_PUBLIC_BASE_URL}/api/vendor/categories/${id}`;
     const requestOptions = {
       headers: {
         'Content-type': 'application/json',
@@ -79,19 +92,8 @@ export default function CategoriesPage() {
     form.setValue('category_description', description);
   };
 
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
-    defaultValues: {
-      category_name: '',
-      parent_id: '',
-      slug: '',
-      category_description: '',
-    },
-  });
-
   const addCategory = (values: z.infer<typeof formSchema>) => {
     async function sendCategoryData() {
-      console.log('sended');
       setIsLoading(true);
 
       const slug = values.category_name.toLowerCase().trim().replace(' ', '_');
@@ -114,7 +116,7 @@ export default function CategoriesPage() {
 
       try {
         const response = await fetch(
-          'http://159.89.20.242/api/vendor/categories',
+          `${process.env.NEXT_PUBLIC_BASE_URL}/api/vendor/categories`,
           requestOptions,
         );
         const result = await response.json();
@@ -130,6 +132,7 @@ export default function CategoriesPage() {
               },
             },
           });
+          setRenderPage(prevValue => !prevValue);
         } else {
           if (result.message) {
             toast.error(result.message, {});
@@ -175,7 +178,7 @@ export default function CategoriesPage() {
 
       try {
         const response = await fetch(
-          `http://159.89.20.242/api/vendor/categories/${editedCategoryId}`,
+          `${process.env.NEXT_PUBLIC_BASE_URL}/api/vendor/categories/${editedCategoryId}`,
           requestOptions,
         );
         const result = await response.json();
@@ -183,7 +186,7 @@ export default function CategoriesPage() {
         if (response.ok) {
           setIsLoading(false);
 
-          toast('Yeni kateqoriya əlavə edildi!', {
+          toast('Kateqoriya uğurla yeniləndi!', {
             action: {
               label: 'Ok',
               onClick: () => {
@@ -191,6 +194,7 @@ export default function CategoriesPage() {
               },
             },
           });
+          setRenderPage(prevValue => !prevValue);
         } else {
           if (result.message) {
             toast.error(result.message, {});
@@ -220,6 +224,62 @@ export default function CategoriesPage() {
     }
   };
 
+  const handleDeleteCategory = async () => {
+    setIsLoading(true);
+
+    const requestOptions: RequestInit = {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json',
+        Accept: 'application/json',
+        Authorization: `Bearer ${localStorage.getItem('vendor_token')}`,
+      },
+      // mode: 'no-cors',
+    };
+
+    try {
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_BASE_URL}/api/vendor/categories/${deletedCategoryId}`,
+        requestOptions,
+      );
+      const result = await response.json();
+
+      if (response.ok) {
+        setIsLoading(false);
+
+        toast('Kateqoriya uğurla silindi!', {
+          action: {
+            label: 'Ok',
+            onClick: () => {
+              setOpen(false);
+            },
+          },
+        });
+        setRenderPage(prevValue => !prevValue);
+      } else {
+        if (result.message) {
+          toast.error(result.message, {});
+        } else {
+          toast.error('Daxil etdiyiniz məlumatlarda yanlışlıq var');
+        }
+        setIsLoading(false);
+      }
+    } catch (error) {
+      toast.error('Gözlənilməyən xəta yarandı.', {
+        description: 'Zəhmət olmasa başqa vaxt yenidən cəhd edin..',
+        action: {
+          label: 'Ok',
+          onClick: () => {
+            setOpen(false);
+          },
+        },
+      });
+      setIsLoading(false);
+    }
+
+    setShowDeleteDialog(false);
+  };
+
   useEffect(() => {
     const getData = async () => {
       const requestOptions: RequestInit = {
@@ -232,7 +292,7 @@ export default function CategoriesPage() {
       };
       try {
         const response = await fetch(
-          'http://technostore.az/api/vendor/categories',
+          `${process.env.NEXT_PUBLIC_BASE_URL}/api/vendor/categories`,
           requestOptions,
         );
         const data = await response.json();
@@ -244,7 +304,11 @@ export default function CategoriesPage() {
     };
 
     getData();
-  }, []);
+  }, [renderPage]);
+
+  useEffect(() => {
+    console.log(deletedCategoryId);
+  }, [deletedCategoryId]);
 
   return (
     <div>
@@ -254,6 +318,7 @@ export default function CategoriesPage() {
           type="button"
           className="mr-4 font-medium text-md"
           onClick={() => {
+            form.reset();
             setOpen(true);
             handleSetEdit();
           }}
@@ -266,7 +331,11 @@ export default function CategoriesPage() {
           columns={columns}
           data={categories}
           setOpen={setOpen}
-          onEditCategory={handleEditCategory}
+          onEditCategory={handleGetEditedCategory}
+          handleOpen={(id: any) => {
+            setShowDeleteDialog(true);
+            setDeletedCategoryId(id);
+          }}
         />
       </div>
       <Drawer open={open} onOpenChange={setOpen}>
@@ -383,6 +452,11 @@ export default function CategoriesPage() {
           </DrawerFooter>
         </DrawerContent>
       </Drawer>
+      <AlertDialogEl
+        open={showDeleteDialog}
+        handleClose={() => setShowDeleteDialog(false)}
+        handleDeleteCategory={handleDeleteCategory}
+      />
     </div>
   );
 }

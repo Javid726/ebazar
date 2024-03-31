@@ -21,8 +21,8 @@ export default function RootLayout({
     <html lang="en">
       <CategoryProvider>
         <body className={open_sans.className}>{children}</body>
+        <Toaster richColors={true} theme="light" closeButton={true} />
       </CategoryProvider>
-      <Toaster richColors={true} theme="light" closeButton={true} />
     </html>
   );
 }

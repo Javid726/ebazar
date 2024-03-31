@@ -38,6 +38,7 @@ interface DataTableProps<TData, TValue> {
   data: TData[];
   setOpen: Dispatch<SetStateAction<boolean>>;
   onEditCategory: (value: {}) => void;
+  handleOpen: any;
 }
 
 export function DataTable<TData, TValue>({
@@ -45,6 +46,7 @@ export function DataTable<TData, TValue>({
   data,
   setOpen,
   onEditCategory,
+  handleOpen,
 }: DataTableProps<TData, TValue>) {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
@@ -54,7 +56,7 @@ export function DataTable<TData, TValue>({
 
   const updatedColumns = columns.map(column => ({
     ...column,
-    customProps: { setOpen, onEditCategory, handleResetEdit }, // Add custom property
+    customProps: { setOpen, onEditCategory, handleResetEdit, handleOpen }, // Add custom property
   }));
 
   const table = useReactTable({
