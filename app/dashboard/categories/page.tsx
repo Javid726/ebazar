@@ -306,10 +306,6 @@ export default function CategoriesPage() {
     getData();
   }, [renderPage]);
 
-  useEffect(() => {
-    console.log(deletedCategoryId);
-  }, [deletedCategoryId]);
-
   return (
     <div>
       <div className="my-2 flex justify-between">
