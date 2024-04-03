@@ -30,7 +30,13 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { Dispatch, SetStateAction, useContext, useState } from 'react';
+import {
+  Dispatch,
+  SetStateAction,
+  useContext,
+  useEffect,
+  useState,
+} from 'react';
 import { CategoryContext } from '@/app/category-provider';
 
 interface DataTableProps<TData, TValue> {

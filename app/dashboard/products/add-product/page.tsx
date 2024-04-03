@@ -36,7 +36,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Separator } from '@/components/ui/separator';
 import { CategoryContext } from '@/app/category-provider';
-import { useContext, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 
 const formSchema = z.object({
@@ -50,7 +50,8 @@ const formSchema = z.object({
 });
 
 export default function AddProduct() {
-  const { categories } = useContext(CategoryContext);
+  const { categories, editedProductDetails, editedProductId, productEdit } =
+    useContext(CategoryContext);
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
 
@@ -73,7 +74,7 @@ export default function AddProduct() {
     setIsLoading(true);
 
     const requestOptions: RequestInit = {
-      method: 'POST',
+      method: productEdit ? 'PUT' : 'POST',
       headers: {
         'Content-Type': 'application/json',
         Accept: 'application/json',
@@ -93,10 +94,19 @@ export default function AddProduct() {
     };
 
     try {
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_BASE_URL}/api/vendor/products`,
-        requestOptions,
-      );
+      let response: any;
+      if (!productEdit) {
+        response = await fetch(
+          `${process.env.NEXT_PUBLIC_BASE_URL}/api/vendor/products`,
+          requestOptions,
+        );
+      } else {
+        response = await fetch(
+          `${process.env.NEXT_PUBLIC_BASE_URL}/api/vendor/products/${editedProductId}`,
+          requestOptions,
+        );
+      }
+
       const result = await response.json();
 
       if (response.ok) {
@@ -133,6 +143,16 @@ export default function AddProduct() {
       setIsLoading(false);
     }
   }
+
+  useEffect(() => {
+    form.setValue('name', editedProductDetails.name);
+    form.setValue('description', editedProductDetails.description);
+    form.setValue('category_id', editedProductDetails.category_id);
+    form.setValue('price', editedProductDetails.price);
+    form.setValue('discount_price', editedProductDetails.discount_price);
+    form.setValue('quantity', editedProductDetails.quantity);
+    form.setValue('sku', editedProductDetails.sku);
+  }, [editedProductDetails]);
 
   return (
     <main>

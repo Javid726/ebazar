@@ -17,7 +17,7 @@ import {
 
 // This type is used to define the shape of our data.
 // You can use a Zod schema here if you want.
-export type Category = {
+export type Product = {
   id: number;
   name: string;
   price: string;
@@ -25,13 +25,14 @@ export type Category = {
   quantity: number;
   description: string;
   parent_id: number;
+  vendor_id: number;
 };
 
 // Define the type of your custom props
 type CustomColumnProps = {
   customProps?: {
     // Define your custom props here
-    onEditCategory: (category: Category) => void;
+    onEditProduct: (product: Product) => void;
     // Add other custom props if needed
   };
 };
@@ -39,7 +40,7 @@ type CustomColumnProps = {
 // Extend ColumnDef with CustomColumnProps
 export type CustomColumnDef<T> = ColumnDef<T> & CustomColumnProps;
 
-export const columns: CustomColumnDef<Category & CustomColumnProps>[] & {
+export const columns: CustomColumnDef<Product & CustomColumnProps>[] & {
   customProps?: any;
 } = [
   {
@@ -97,7 +98,7 @@ export const columns: CustomColumnDef<Category & CustomColumnProps>[] & {
   {
     id: 'actions',
     cell: ({ row, column }) => {
-      const payment = row.original;
+      const product = row.original;
 
       return (
         <DropdownMenu>
@@ -110,14 +111,14 @@ export const columns: CustomColumnDef<Category & CustomColumnProps>[] & {
           <DropdownMenuContent align="end">
             <DropdownMenuLabel>Əməliyyatlar</DropdownMenuLabel>
             <DropdownMenuItem
-              onClick={() => navigator.clipboard.writeText(String(payment.id))}
+              onClick={() => navigator.clipboard.writeText(String(product.id))}
             >
               ID-ni kopyala
             </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem
               onClick={() => {
-                column.columnDef.customProps.onEditCategory(payment);
+                column.columnDef.customProps.onEditProduct(product);
                 column.columnDef.customProps.handleResetEdit();
               }}
             >
@@ -126,7 +127,7 @@ export const columns: CustomColumnDef<Category & CustomColumnProps>[] & {
             <DropdownMenuSeparator />
             <DropdownMenuItem
               onClick={() =>
-                column.columnDef.customProps.handleOpen(payment.id)
+                column.columnDef.customProps.handleOpen(product.id)
               }
             >
               Məhsulu sil
