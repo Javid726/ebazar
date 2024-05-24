@@ -23,6 +23,7 @@ export default function ProductsPage() {
   const [renderPage, setRenderPage] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [deletedProductId, setDeletedProductId] = useState('');
+  const [productsLoading, setProductsLoading] = useState(false);
   // const [editedProductId, setEditedProductId] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   // const [editedProductDetails, setEditedProductDetails] = useState({
@@ -138,6 +139,7 @@ export default function ProductsPage() {
 
   useEffect(() => {
     const getData = async () => {
+      setProductsLoading(true);
       const requestOptions: RequestInit = {
         method: 'GET',
         headers: {
@@ -157,6 +159,8 @@ export default function ProductsPage() {
       } catch (error) {
         console.log(error);
         setProducts([]);
+      } finally {
+        setProductsLoading(false);
       }
     };
 
@@ -181,8 +185,16 @@ export default function ProductsPage() {
           </>
         )}
       </div>
-      <div className="mt-20">
-        {products.length === 0 ? (
+      <div className="mt-10">
+        {productsLoading ? (
+          <div className="flex flex-col space-y-3 w-full">
+            <Skeleton className="h-[250px] w-[90%] rounded-xl px-10" />
+            <div className="space-y-2">
+              <Skeleton className="h-4 w-[450px]" />
+              <Skeleton className="h-4 w-[200px]" />
+            </div>
+          </div>
+        ) : products.length === 0 ? (
           <EmptyProducts />
         ) : (
           <DataTable

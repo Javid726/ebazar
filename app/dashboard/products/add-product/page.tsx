@@ -5,7 +5,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { toast } from 'sonner';
-import { Loader2 } from 'lucide-react';
+import { Loader2, Asterisk } from 'lucide-react';
 import Link from 'next/link';
 
 import { Button } from '@/components/ui/button';
@@ -171,7 +171,13 @@ export default function AddProduct() {
                   name="name"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Məhsulun adı</FormLabel>
+                      <FormLabel className="relative">
+                        Məhsulun adı{' '}
+                        <Asterisk
+                          className="absolute top-0 -right-4 text-slate-500"
+                          size={14}
+                        />
+                      </FormLabel>
                       <FormControl>
                         <Input {...field} />
                       </FormControl>
@@ -200,7 +206,13 @@ export default function AddProduct() {
                     name="price"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Qiyməti</FormLabel>
+                        <FormLabel className="relative">
+                          Qiyməti{' '}
+                          <Asterisk
+                            className="absolute top-0 -right-4 text-slate-500"
+                            size={14}
+                          />
+                        </FormLabel>
                         <FormControl className="w-[300px]">
                           <Input type="number" {...field} />
                         </FormControl>
