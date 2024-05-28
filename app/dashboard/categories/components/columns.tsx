@@ -5,6 +5,7 @@ import { ColumnDef } from '@tanstack/react-table';
 import { MoreHorizontal, ArrowUpDown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
+import { Row } from '@tanstack/react-table';
 
 import {
   DropdownMenu,
@@ -86,7 +87,13 @@ export const columns: CustomColumnDef<Category & CustomColumnProps>[] & {
   },
   {
     id: 'actions',
-    cell: ({ row, column }) => {
+    cell: ({
+      row,
+      column,
+    }: {
+      row: Row<Category & CustomColumnProps>;
+      column: any;
+    }) => {
       const payment = row.original;
 
       return (
