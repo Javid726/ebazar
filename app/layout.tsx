@@ -3,6 +3,7 @@ import { Inter, Open_Sans } from 'next/font/google';
 import './globals.css';
 import { Toaster } from '@/components/ui/sonner';
 import CategoryProvider from './category-provider';
+import Head from 'next/head';
 
 const inter = Inter({ subsets: ['latin'] });
 const open_sans = Open_Sans({ subsets: ['latin'] });
@@ -19,6 +20,12 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
+      <Head>
+        <meta
+          http-equiv="Content-Security-Policy"
+          content="upgrade-insecure-requests"
+        />
+      </Head>
       <CategoryProvider>
         <body className={open_sans.className}>{children}</body>
         <Toaster richColors={true} theme="light" closeButton={true} />

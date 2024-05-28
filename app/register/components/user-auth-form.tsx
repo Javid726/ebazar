@@ -77,7 +77,7 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
         // mode: 'no-cors',
       };
       const response = await fetch(
-        'http://159.89.20.242/api/vendor/register',
+        `${process.env.NEXT_PUBLIC_BASE_URL}/api/vendor/register`,
         requestOptions,
       );
 

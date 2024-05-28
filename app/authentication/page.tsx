@@ -71,7 +71,7 @@ export default function LoginAccount() {
         // mode: 'no-cors',
       };
       const response = await fetch(
-        'http://159.89.20.242/api/vendor/login',
+        `${process.env.NEXT_PUBLIC_BASE_URL}/api/vendor/login`,
         requestOptions,
       );
       const result = await response.json();

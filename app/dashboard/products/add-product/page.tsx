@@ -87,7 +87,7 @@ export default function AddProduct() {
         discount_price: Number(values.discount_price),
         category_id: Number(values.category_id),
         quantity: Number(values.quantity),
-        option_name: 'size?',
+        option_name: '',
         sku: values.sku,
       }),
       // mode: 'no-cors',
